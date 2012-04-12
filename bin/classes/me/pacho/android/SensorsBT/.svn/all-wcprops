@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/!svn/ver/12/trunk/tests/RawSensorPlotter/src/me/pacho/android/PathDrawer2D
+END
+Panel.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/12/trunk/tests/RawSensorPlotter/src/me/pacho/android/PathDrawer2D/Panel.java
+END
+CanvasThread.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/!svn/ver/12/trunk/tests/RawSensorPlotter/src/me/pacho/android/PathDrawer2D/CanvasThread.java
+END
+Drawer.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/12/trunk/tests/RawSensorPlotter/src/me/pacho/android/PathDrawer2D/Drawer.java
+END
+SensorGuy.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/!svn/ver/12/trunk/tests/RawSensorPlotter/src/me/pacho/android/PathDrawer2D/SensorGuy.java
+END
