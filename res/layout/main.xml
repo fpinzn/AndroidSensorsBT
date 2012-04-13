@@ -1,11 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
-<me.pacho.android.SensorsBT.Panel android:id="@+id/SurfaceView01" android:layout_width="wrap_content" 
 
-android:layout_height="wrap_content" android:maxHeight="40dip">
-</me.pacho.android.SensorsBT.Panel>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <TextView
+        android:id="@+id/tv_Title"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:gravity="center_vertical|center_horizontal"
+        android:text="Searching Compatible BT Service"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        style="?android:attr/progressBarStyleLarge"
+        android:gravity="center_vertical|center_horizontal"
+          android:layout_width="match_parent"
+        android:layout_height="100dp" />
+
+     <TextView
+        android:id="@+id/tv_Msg" 
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:gravity="center_vertical|left"
+        android:text=""/>
+    
 </LinearLayout>

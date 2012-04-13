@@ -38,13 +38,13 @@ public class SensorGuy implements SensorEventListener{
         mSensorManager.registerListener(this, mGravity, SensorManager.SENSOR_DELAY_FASTEST);
 
     }
-	@Override
+	
 	public void onAccuracyChanged(Sensor arg0, int arg1) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
+	
 	 public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
         	copyArray(lastAcceleration,event.values);
