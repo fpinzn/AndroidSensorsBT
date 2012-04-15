@@ -1,3 +1,5 @@
+package me.pacho.android.SensorsBT;
+
 /*
  * Copyright (C) 2009 The Android Open Source Project
  *
@@ -14,12 +16,12 @@
  * limitations under the License.
  */
 
-package me.pacho.android.SensorsBT;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
@@ -29,12 +31,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
 /**
- * This class is largely based on the "BluetoothChatService.java" Class by the Android Open Source Project.
- * 
- * It manages the connections with other devices. It has a thread that listens for
+ * This class does all the work for setting up and managing Bluetooth
+ * connections with other devices. It has a thread that listens for
  * incoming connections, a thread for connecting with a device, and a
  * thread for performing data transmissions when connected.
  */
@@ -44,18 +44,15 @@ public class BTGuy {
     private static final boolean D = true;
 
     // Name for the SDP record when creating server socket
-    private static final String SERVICE_NAME = "Sensors BT";
+    private static final String NAME_INSECURE = "BluetoothChatInsecure";
 
     // Unique UUID for this application
-    private static final UUID MY_UUID_SECURE =
-        UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
-    private static final UUID MY_UUID_INSECURE =
+     private static final UUID MY_UUID_INSECURE =
         UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
     // Member fields
     private final BluetoothAdapter mAdapter;
     private final Handler mHandler;
-    private AcceptThread mSecureAcceptThread;
     private AcceptThread mInsecureAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
@@ -66,8 +63,7 @@ public class BTGuy {
     public static final int STATE_LISTEN = 1;     // now listening for incoming connections
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
-    
-  
+
     /**
      * Constructor. Prepares a new BluetoothChat session.
      * @param context  The UI Activity Context
@@ -88,7 +84,7 @@ public class BTGuy {
         mState = state;
 
         // Give the new state to the Handler so the UI Activity can update
-        mHandler.obtainMessage(SensorsBT.MESSAGE_STATE_CHANGE, state,  -1).sendToTarget();
+       // mHandler.obtainMessage(SensorsBT.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
     }
 
     /**
@@ -100,7 +96,7 @@ public class BTGuy {
     /**
      * Start the chat service. Specifically start AcceptThread to begin a
      * session in listening (server) mode. Called by the Activity onResume() */
-    public synchronized void start() {
+    public synchronized void srtart() {
         if (D) Log.d(TAG, "start");
 
         // Cancel any thread attempting to make a connection
@@ -111,11 +107,6 @@ public class BTGuy {
 
         setState(STATE_LISTEN);
 
-        // Start the thread to listen on a BluetoothServerSocket
-        if (mSecureAcceptThread == null) {
-            mSecureAcceptThread = new AcceptThread(true);
-            mSecureAcceptThread.start();
-        }
         if (mInsecureAcceptThread == null) {
             mInsecureAcceptThread = new AcceptThread(false);
             mInsecureAcceptThread.start();
@@ -127,7 +118,7 @@ public class BTGuy {
      * @param device  The BluetoothDevice to connect
      * @param secure Socket Security type - Secure (true) , Insecure (false)
      */
-    public synchronized void connect(BluetoothDevice device, boolean secure) {
+    public synchronized void connect(BluetoothDevice device) {
         if (D) Log.d(TAG, "connect to: " + device);
 
         // Cancel any thread attempting to make a connection
@@ -139,7 +130,7 @@ public class BTGuy {
         if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
 
         // Start the thread to connect with the given device
-        mConnectThread = new ConnectThread(device, secure);
+        mConnectThread = new ConnectThread(device, false);
         mConnectThread.start();
         setState(STATE_CONNECTING);
     }
@@ -159,11 +150,6 @@ public class BTGuy {
         // Cancel any thread currently running a connection
         if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
 
-        // Cancel the accept thread because we only want to connect to one device
-        if (mSecureAcceptThread != null) {
-            mSecureAcceptThread.cancel();
-            mSecureAcceptThread = null;
-        }
         if (mInsecureAcceptThread != null) {
             mInsecureAcceptThread.cancel();
             mInsecureAcceptThread = null;
@@ -174,13 +160,13 @@ public class BTGuy {
         mConnectedThread.start();
 
         // Send the name of the connected device back to the UI Activity
-        Message msg = mHandler.obtainMessage(SensorsBT.MESSAGE_DEVICE_NAME);
+       /* Message msg = mHandler.obtainMessage(SensorsBT.MESSAGE_DEVICE_NAME);
         Bundle bundle = new Bundle();
         bundle.putString(SensorsBT.DEVICE_NAME, device.getName());
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
-        setState(STATE_CONNECTED);
+        setState(STATE_CONNECTED);*/
     }
 
     /**
@@ -199,10 +185,6 @@ public class BTGuy {
             mConnectedThread = null;
         }
 
-        if (mSecureAcceptThread != null) {
-            mSecureAcceptThread.cancel();
-            mSecureAcceptThread = null;
-        }
 
         if (mInsecureAcceptThread != null) {
             mInsecureAcceptThread.cancel();
@@ -235,14 +217,14 @@ public class BTGuy {
      */
     private void connectionFailed() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(SensorsBT.MESSAGE_TOAST);
+      /*  Message msg = mHandler.obtainMessage(SensorsBT.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
         bundle.putString(SensorsBT.TOAST, "Unable to connect device");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
         // Start the service over to restart listening mode
-        BTGuy.this.start();
+        //BTGuy.this.connect();*/
     }
 
     /**
@@ -250,14 +232,14 @@ public class BTGuy {
      */
     private void connectionLost() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(SensorsBT.MESSAGE_TOAST);
+        /*Message msg = mHandler.obtainMessage(SensorsBT.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
         bundle.putString(SensorsBT.TOAST, "Device connection was lost");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
         // Start the service over to restart listening mode
-        BTGuy.this.start();
+        //BTGuy.this.start();*/
     }
 
     /**
@@ -276,9 +258,9 @@ public class BTGuy {
 
             // Create a new listening server socket
             try {
- 
+               
                     tmp = mAdapter.listenUsingInsecureRfcommWithServiceRecord(
-                            SERVICE_NAME, MY_UUID_INSECURE);
+                            NAME_INSECURE, MY_UUID_INSECURE);
                 
             } catch (IOException e) {
                 Log.e(TAG, "Socket Type: " + mSocketType + "listen() failed", e);
@@ -360,13 +342,10 @@ public class BTGuy {
             // Get a BluetoothSocket for a connection with the
             // given BluetoothDevice
             try {
-                if (secure) {
-                    tmp = device.createRfcommSocketToServiceRecord(
-                            MY_UUID_SECURE);
-                } else {
+               
                     tmp = device.createInsecureRfcommSocketToServiceRecord(
                             MY_UUID_INSECURE);
-                }
+                
             } catch (IOException e) {
                 Log.e(TAG, "Socket Type: " + mSocketType + "create() failed", e);
             }
@@ -385,6 +364,7 @@ public class BTGuy {
                 // This is a blocking call and will only return on a
                 // successful connection or an exception
                 mmSocket.connect();
+                Log.i("ISCON",mmSocket.isConnected()+"");
             } catch (IOException e) {
                 // Close the socket
                 try {
@@ -443,7 +423,7 @@ public class BTGuy {
         }
 
         public void run() {
-            Log.i(TAG, "BEGIN mConnectedThread");
+          /*  Log.i(TAG, "BEGIN mConnectedThread");
             byte[] buffer = new byte[1024];
             int bytes;
 
@@ -460,10 +440,10 @@ public class BTGuy {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
                     // Start the service over to restart listening mode
-                    BTGuy.this.start();
+                    //BTGuy.this.start();
                     break;
                 }
-            }
+            }*/
         }
 
         /**
@@ -471,7 +451,7 @@ public class BTGuy {
          * @param buffer  The bytes to write
          */
         public void write(byte[] buffer) {
-            try {
+          /*  try {
                 mmOutStream.write(buffer);
 
                 // Share the sent message back to the UI Activity
@@ -479,7 +459,7 @@ public class BTGuy {
                         .sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
-            }
+            }*/
         }
 
         public void cancel() {
